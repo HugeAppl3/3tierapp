@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments & Dependencies
+venv/
+.env
+.venv
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDEs and OS junk
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Docker files
+Dockerfile
+.dockerignore

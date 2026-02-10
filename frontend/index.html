@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MMcGuire 3-Tier App Demo</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .status { padding: 20px; margin: 20px; border-radius: 8px; display: inline-block; }
+        .healthy { background-color: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>How's the GCP 3-Tier Architecture Doing?</h1>
+    <div id="status-box" class="status">Connecting to Backend...</div>
+
+    <script>
+        // Replace with your actual Load Balancer IP
+        const BACKEND_URL = "https://34.36.112.201/health";
+
+        fetch(BACKEND_URL)
+            .then(response => response.json())
+            .then(data => {
+                const box = document.getElementById('status-box');
+                box.className = 'status healthy';
+                box.innerText = `Backend Status: ${data.status} | DB: ${data.database}`;
+            })
+            .catch(err => {
+                document.getElementById('status-box').innerText = "Error connecting to backend.";
+            });
+    </script>
+</body>
+</html>
