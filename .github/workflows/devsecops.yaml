@@ -21,7 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 5. Authenticate to GCP using your existing WIF setup
+      #  Authenticate to GCP using your existing WIF setup
       - name: Google Auth
         id: auth
         uses: google-github-actions/auth@v2
@@ -30,6 +30,7 @@ jobs:
           workload_identity_provider: 'projects/940902231079/locations/global/workloadIdentityPools/github-pool/providers/hugeappl3github'
           service_account: 'github-deployer@tierapp-486801.iam.gserviceaccount.com'
 
+      # Build the Image and push to Artifact Registry
       - name: Build Docker Image
         run: |
           docker build -t us-central1-docker.pkg.dev/tierapp-486801/app-repo/my-app-image:latest .
@@ -42,12 +43,7 @@ jobs:
         run: |
             docker push us-central1-docker.pkg.dev/tierapp-486801/app-repo/my-app-image:latest
 
-      - name: Run Trivy Image Scan
-        run: |
-            trivy image --format sarif --output trivy-image-results.sarif \
-              us-central1-docker.pkg.dev/tierapp-486801/app-repo/my-app-image:latest
-
-      # 1. Scan Infrastructure as Code (Terraform / GCP Configs)
+      # Scan Infrastructure as Code (Terraform / GCP Configs)
       - name: Run Trivy IaC Scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -58,7 +54,7 @@ jobs:
           exit-code: '0' # Fails the build if vulnerabilities are found
           severity: 'CRITICAL,HIGH'
 
-      # 2. Scan Software Dependencies (SCA) and File System
+      # Scan Software Dependencies (SCA) and File System
       - name: Run Trivy FS Scan (SCA)
         uses: aquasecurity/trivy-action@master
         with:
@@ -67,7 +63,7 @@ jobs:
           output: 'trivy-fs-results.sarif'
           severity: 'CRITICAL,HIGH'
 
-      # 3. Scan for Secrets (Hardcoded keys, GCP Service Accounts, etc.)
+      # Scan for Secrets (Hardcoded keys, GCP Service Accounts, etc.)
       - name: Run Trivy Secret Scan
         uses: aquasecurity/trivy-action@master
         with:
