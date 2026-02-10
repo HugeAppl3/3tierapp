@@ -1,0 +1,89 @@
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  # Allows you to run this manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  trivy-security-scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # Required to upload results to the Security tab
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Scan Infrastructure as Code (Terraform / GCP Configs)
+      - name: Run Trivy IaC Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          format: 'sarif'
+          output: 'trivy-iac-results.sarif'
+          exit-code: '1' # Fails the build if vulnerabilities are found
+          severity: 'CRITICAL,HIGH'
+
+      # 2. Scan Software Dependencies (SCA) and File System
+      - name: Run Trivy FS Scan (SCA)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'sarif'
+          output: 'trivy-fs-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      # 3. Scan for Secrets (Hardcoded keys, GCP Service Accounts, etc.)
+      - name: Run Trivy Secret Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scanners: 'secret'
+          severity: 'CRITICAL,HIGH'
+
+      # 4. Upload results to GitHub Security Tab (SARIF format)
+      # This gives you the GHAS "look and feel" for free
+      - name: Upload results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() # Ensures results are uploaded even if a previous step failed
+        with:
+          sarif_file: 'trivy-iac-results.sarif'
+          category: 'trivy-iac'
+
+   ## 5. Authenticate to GCP using your existing WIF setup
+   #- name: Google Auth
+   #  id: auth
+   #  uses: google-github-actions/auth@v2
+   #  with:
+   #    token_format: 'access_token'
+   #    workload_identity_provider: 'projects/940902231079/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+   #    service_account: 'github-actions-sa@tierapp-486801.iam.gserviceaccount.com'
+
+   ## 6. Log in to Docker to allow Trivy to pull the private image
+   #- name: Docker Auth
+   #  run: |
+   #    echo "${{ steps.auth.outputs.access_token }}" | docker login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
+
+   ## 7. Scan the Image in Artifact Registry
+   #- name: Run Trivy Image Scan
+   #  uses: aquasecurity/trivy-action@master
+   #  with:
+   #    image-ref: 'us-central1-docker.pkg.dev/tierapp-486801/app-repo/my-app-image:latest'
+   #    format: 'sarif'
+   #    output: 'trivy-image-results.sarif'
+   #    severity: 'CRITICAL,HIGH'
+
+   ## Update the Upload step to include the new results
+   #- name: Upload results to GitHub Security
+   #  uses: github/codeql-action/upload-sarif@v3
+   #  if: always()
+   #  with:
+   #    sarif_file: 'trivy-image-results.sarif'
+   #    category: 'trivy-image'
