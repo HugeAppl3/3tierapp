@@ -57,6 +57,16 @@ jobs:
           sarif_file: 'trivy-iac-results.sarif'
           category: 'trivy-iac'
 
+      - name: Run Trivy (SARIF output)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'app-image:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          # Add this line here:
+          args: --skip-version-check
+
    ## 5. Authenticate to GCP using your existing WIF setup
    #- name: Google Auth
    #  id: auth
