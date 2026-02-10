@@ -65,7 +65,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           token_format: 'access_token'
-          workload_identity_provider: 'projects/940902231079/locations/global/workloadIdentityPools/github-pool/providers/HugeAppl3github'
+          workload_identity_provider: 'projects/940902231079/locations/global/workloadIdentityPools/github-pool/providers/hugeappl3github'
           service_account: 'github-actions-sa@tierapp-486801.iam.gserviceaccount.com'
 
       # 6. Log in to Docker to allow Trivy to pull the private image
