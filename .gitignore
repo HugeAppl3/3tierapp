@@ -1,0 +1,19 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Environment Variables & Secrets
+.env
+*.pem
+*.key
+
+# OS / IDE specific
+.DS_Store
+.vscode/
+.idea/
+
+# Node.js (if using for frontend)
+node_modules/
+dist/
